@@ -15,6 +15,12 @@ client.initialize();
 
 client.on('message', message => {
 	if(message.body === 'hi') {
-		message.reply('Hello, which vendor would you like to order from today?');
+		message.reply('Hello, which vendor would you like to order from today?\n(1).GJB');
+	}
+});
+
+client.on('message', message => {
+	if(message.body === '1') {
+		message.reply('Thank you for ordering from GJB today, here is our menu\n(1)');
 	}
 });

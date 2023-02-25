@@ -2,30 +2,67 @@
     "vendors" :
     [ {
         "name" : "GJB",
-        "menu" : {
-            "Masala dosa" : "60",
-            "idli" : "30",
-            "samosa" : "15",
-            "chole bhature" : "70"
+        "menu" : [
+            {
+                "name": "Masala dosa",
+                "price": 50
+            },
+            {
+                "name": "Idli",
+                "price": 30
+            },
+            {
+                "name": "Samosa",
+                "price": 15
+            },
+            {
+                "name": "Chole Bhature",
+                "price": 80
+            }
+        ]
     }
-    },
+    ,
     {
-        "name" : "Pircube",
-        "menu" : {
-            "Masala dosa" : "60",
-            "idli" : "30",
-            "samosa" : "15",
-            "chole bhature" : "70"
-        }
+        "name" : "PirCube",
+        "menu" : [
+            {
+                "name": "Masala dosa",
+                "price": 50
+            },
+            {
+                "name": "Idli",
+                "price": 30
+            },
+            {
+                "name": "Samosa",
+                "price": 15
+            },
+            {
+                "name": "Chole Bhature",
+                "price": 80
+            }
+        ]
     },
     {
         "name" : "Juice Point",
-        "menu" : {
-            "Masala dosa" : "60",
-            "idli" : "30",
-            "samosa" : "15",
-            "chole bhature" : "70"
-        }
+        "menu" : [
+            {
+                "name": "Masala dosa",
+                "price": 50
+            },
+            {
+                "name": "Idli",
+                "price": 30
+            },
+            {
+                "name": "Samosa",
+                "price": 15
+            },
+            {
+                "name": "Chole Bhature",
+                "price": 80
+            }
+        ]
     }]
 
 }

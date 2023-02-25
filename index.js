@@ -1,13 +1,11 @@
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
-const menu = require('./menu.json');
+const bigmenu = require('./menu.json');
 
 
-const { Client, LocalAuth} = require('whatsapp-web.js');
+const { Client } = require('whatsapp-web.js');
 
-const client = new Client({
-    authStrategy: new LocalAuth(),
-  });
+const client = new Client();
 
 const SESSION_FILE_PATH = './session.json';
 
@@ -28,30 +26,28 @@ client.on('ready', () => {
 
 client.initialize();
 
+function findObjectByName(arr, name) {
+	for (let i = 0; i < arr.length; i++) {
+	  if (arr[i].name === name) {
+		return arr[i];
+	  }
+	}
+	return null;
+  }
+
 client.on('message', message => {
 	if(message.body === 'hi') {
-		message.reply('Hello, which vendor would you like to order from today? (pick number) \n\n(1) GJB');
+		message.reply('Hello, which vendor would you like to order from today? (type name) \n\nGJB\nPircube\nJuice Point');
 		client.on('message', message => {
-			if(message.body === '1') {
-				message.reply('Thank you for ordering from GJB today, here is our menu\n(1) Masala dosa\n(2) Idli\n(3) Chole Bhature');
-				client.on('message', message => {
+			
+			let namesString = '';
+			vendor = findObjectByName(bigmenu.vendors, message.body);
+			
+			for (let i = 0; i < vendor.menu.length; i++) {
+				namesString += vendor.menu[i].name + '\n';
+			  }
+			client.sendMessage(message.from, namesString);
 
-					if(message.body.toLowerCase() === 'masala dosa')
-					{
-						message.reply('1 masala dosa confirmed');
-					}
-
-					if(message.body.toLowerCase() === 'idli')
-					{
-						message.reply('1 idli confirmed');
-					}					
-
-					if(message.body.toLowerCase() === 'chole bhature')
-					{
-						message.reply('1 chole bhature confirmed');
-					}
-				})
-			}
 		});
 	}
 });

@@ -68,12 +68,12 @@ async function startBot() {
 
 					if(message.body === '/order')
 					{
-						await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.map((item, index) => `${index + 1}. ${item.name} - $${item.price}`).join('\n')}\n\nPlease reply with the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
+						await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - $${item.price}`).join('\n')}\n\nPlease reply with the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
 					}
 					else if(message.body.startsWith('/confirm')){
 						
 						const orderItems = message.body.slice(8).split(',').map(item => Number(item.trim()) - 1);
-						const items = orderItems.map(index => vendor[index]);
+						const items = orderItems.map(index => vendor.menu[index]);
 						const total = items.reduce((acc, curr) => acc + curr.price, 0);
 						await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - $${item.price}`).join('\n')}\n\nYour total is $${total}. Please confirm your order by typing "Yes".`);
 						

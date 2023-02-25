@@ -1,10 +1,10 @@
 const qrcode = require('qrcode-terminal');
 
-const { Client, RemoteAuth } = require('whatsapp-web.js');
+const { Client} = require('whatsapp-web.js');
 const client = new Client();
 
-const { MongoStore } = require('wwebjs-mongo');
-const mongoose = require('mongoose');
+//const { MongoStore } = require('wwebjs-mongo');
+//const mongoose = require('mongoose');
 
 
 

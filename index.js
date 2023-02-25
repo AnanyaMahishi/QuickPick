@@ -1,7 +1,12 @@
 const qrcode = require('qrcode-terminal');
 
-const { Client } = require('whatsapp-web.js');
+const { Client, RemoteAuth } = require('whatsapp-web.js');
 const client = new Client();
+
+const { MongoStore } = require('wwebjs-mongo');
+const mongoose = require('mongoose');
+
+
 
 client.on('qr', qr => {
     qrcode.generate(qr, {small: true});
@@ -21,7 +26,36 @@ client.on('message', message => {
 				message.reply('Thank you for ordering from GJB today, here is our menu\n(1) Masala dosa\n(2) Idli\n(3) Chole Bhature');
 				client.on('message', message => {
 
-					// Client enters numerical values, push the respective items to db and ask for srn and push that too
+					cont = 1;
+					foodOrder = new Array();
+					orderObj = {
+
+						id : "",
+						orderArr : [], 
+					}
+					while(cont)
+					{
+					
+						if(message.body == '1')
+						{
+							foodOrder.push('Masala Dosa');
+						}
+						if(message.body == '2')
+						{
+							foodOrder.push('Idli');
+						}
+						if(message.body == '3')
+						{
+							foodOrder.push('Chole Bhature');
+						}
+						message.reply('Would you like to continue?(y/n)')
+						client.on('message', message => {
+							if(message.body != 'y')
+								cont = 0;
+
+					})
+				}
+
 				})
 			}
 		});

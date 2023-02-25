@@ -62,7 +62,7 @@ async function startBot() {
 				// 	namesString += vendor.menu[i].name + '\n';
 				//   }
 
-				await client.sendMessage(msg.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - $${item.price}`).join('\n')}\n\nPlease reply with the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
+				await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - $${item.price}`).join('\n')}\n\nPlease reply with the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
 				client.sendMessage(message.from, namesString);
 
 				client.on('message', message =>

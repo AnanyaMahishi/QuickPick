@@ -1,13 +1,20 @@
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const bigmenu = require('./menu.json');
+const MongoClient = require("mongodb").MongoClient;
 
+// MongoDB connection URL and database name
+const mongoUrl = 'mongodb+srv://quickPick:quickPick@quickpick.kqhqbdn.mongodb.net/test';
+const dbName = 'foodOrders';
+
+
+
+// Create a new MongoDB client
+const mongoClient = new MongoClient(mongoUrl, { useUnifiedTopology: true });
 
 const { Client } = require('whatsapp-web.js');
 
 const client = new Client();
-
-const SESSION_FILE_PATH = './session.json';
 
 //const { MongoStore } = require('wwebjs-mongo');
 //const mongoose = require('mongoose');

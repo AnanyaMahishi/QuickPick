@@ -28,11 +28,7 @@ client.on('message', message => {
 
 					cont = 1;
 					foodOrder = new Array();
-					orderObj = {
-
-						id : "",
-						orderArr : [], 
-					}
+					
 					while(cont)
 					{
 					

@@ -19,7 +19,10 @@ client.on('message', message => {
 		client.on('message', message => {
 			if(message.body === '1') {
 				message.reply('Thank you for ordering from GJB today, here is our menu\n(1) Masala dosa\n(2) Idli\n(3) Chole Bhature');
-				
+				client.on('message', message => {
+
+					// Client enters numerical values, push the respective items to db and ask for srn and push that too
+				})
 			}
 		});
 	}

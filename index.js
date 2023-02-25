@@ -50,21 +50,41 @@ async function startBot() {
     // Listen for new messages
     client.on('message', async (message) => 
     {
-		if(message.body === 'hi') {
+		if(message.body === 'Hi') {
 			message.reply('Hello, which vendor would you like to order from today? (type name) \n\nGJB\nPircube\nJuice Point');
-			client.on('message', message => {
+			client.on('message', async(message) => 
+			{
 				
 				let namesString = '';
 				vendor = findObjectByName(bigmenu.vendors, message.body);
 				
-				for (let i = 0; i < vendor.menu.length; i++) {
-					namesString += vendor.menu[i].name + '\n';
-				  }
+				// for (let i = 0; i < vendor.menu.length; i++) {
+				// 	namesString += vendor.menu[i].name + '\n';
+				//   }
+
+				await client.sendMessage(msg.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - $${item.price}`).join('\n')}\n\nPlease reply with the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
 				client.sendMessage(message.from, namesString);
+
+				client.on('message', message =>
+				{
+					let order = {
+						id : "",
+						order : [],
+						cost : ""
+					}
+
+					// Order multiple functionality
+					// Include total cost
+					// Ask for srn and put it into the id field after taking food orders
+
+
+				}
+			)
 	
 			});
 		}
-})
+	}
+	)
 }
 
 client.initialize();

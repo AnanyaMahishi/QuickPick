@@ -26,32 +26,20 @@ client.on('message', message => {
 				message.reply('Thank you for ordering from GJB today, here is our menu\n(1) Masala dosa\n(2) Idli\n(3) Chole Bhature');
 				client.on('message', message => {
 
-					cont = 1;
-					foodOrder = new Array();
-					
-					while(cont)
+					if(message.body.toLowerCase() === 'masala dosa')
 					{
-					
-						if(message.body == '1')
-						{
-							foodOrder.push('Masala Dosa');
-						}
-						if(message.body == '2')
-						{
-							foodOrder.push('Idli');
-						}
-						if(message.body == '3')
-						{
-							foodOrder.push('Chole Bhature');
-						}
-						message.reply('Would you like to continue?(y/n)')
-						client.on('message', message => {
-							if(message.body != 'y')
-								cont = 0;
+						message.reply('1 masala dosa confirmed');
+					}
 
-					})
-				}
+					if(message.body.toLowerCase() === 'idli')
+					{
+						message.reply('1 idli confirmed');
+					}					
 
+					if(message.body.toLowerCase() === 'chole bhature')
+					{
+						message.reply('1 chole bhature confirmed');
+					}
 				})
 			}
 		});

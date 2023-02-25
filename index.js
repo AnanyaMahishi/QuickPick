@@ -2,23 +2,18 @@ const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 
 
-const { Client} = require('whatsapp-web.js');
+const { Client, LocalAuth} = require('whatsapp-web.js');
 
 const client = new Client({
-    authStrategy: new LegacySessionAuth({
-        session: sessionData
-    })
-});
+    authStrategy: new LocalAuth(),
+  });
 
 const SESSION_FILE_PATH = './session.json';
 
 //const { MongoStore } = require('wwebjs-mongo');
 //const mongoose = require('mongoose');
 
-let sessionData;
-if(fs.existsSync(SESSION_FILE_PATH)) {
-    sessionData = require(SESSION_FILE_PATH);
-}
+
 
 
 client.on('qr', qr => {
@@ -29,15 +24,6 @@ client.on('ready', () => {
     console.log('Client is ready!');
 });
 
-client.on('authenticated', (session) => {
-    sessionData = session;
-    fs.writeFile(SESSION_FILE_PATH, JSON.stringify(session), (err) => {
-        if (err) {
-            console.error(err);
-        }
-    });
-});
- 
 
 client.initialize();
 

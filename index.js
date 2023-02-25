@@ -14,7 +14,7 @@ client.on('ready', () => {
 client.initialize();
 
 client.on('message', message => {
-	if(message.body === '!ping') {
-		message.reply('pong');
+	if(message.body === 'hi') {
+		message.reply('Hello, which vendor would you like to order from today?');
 	}
 });

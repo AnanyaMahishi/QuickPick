@@ -48,40 +48,40 @@ async function startBot() {
 		return null;
 	  }
     // Listen for new messages
-    client.on('message', async (message) => 
+    client.on('message', message => 
     {
 		if(message.body === 'Hi') {
 			message.reply('Hello, which vendor would you like to order from today? (type name) \n\nGJB\nPircube\nJuice Point');
 			client.on('message', async(message) => 
 			{
 				
-				let namesString = '';
+				//let namesString = '';
 				vendor = findObjectByName(bigmenu.vendors, message.body);
+				console.log(vendor.name);
+				client.sendMessage(message.from, "Type /order to start ordering now, /confirm when you're done");
 				
 				// for (let i = 0; i < vendor.menu.length; i++) {
 				// 	namesString += vendor.menu[i].name + '\n';
 				//   }
 				//client.sendMessage(message.from, namesString);
+				client.on('message', async(message) => {
 
-				await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - $${item.price}`).join('\n')}\n\nPlease reply with the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
-				client.on('message', async(message)=>{
-
-					const orderItems = message.body.split(',').map(item => Number(item.trim()) - 1);
-					const items = orderItems.map(index => vendor.menu[index]);
-					const total = items.reduce((acc, curr) => acc + curr.price, 0);
-					await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - $${item.price}`).join('\n')}\n\nYour total is $${total}. Please confirm your order by typing "Yes".`);
-					client.on('message', async(message)=>{
-						if(message.body === 'yes'){
-							let order = {
-								foodorder : items,
-								cost : total
-							}
-							await db.collection('orders').insertOne(order);
-							await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing the Food Company.');
-						}
-					})
+					if(message.body === '/order')
+					{
+						await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.map((item, index) => `${index + 1}. ${item.name} - $${item.price}`).join('\n')}\n\nPlease reply with the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
+					}
+					else if(message.body.startsWith('/confirm')){
+						
+						const orderItems = message.body.slice(8).split(',').map(item => Number(item.trim()) - 1);
+						const items = orderItems.map(index => vendor[index]);
+						const total = items.reduce((acc, curr) => acc + curr.price, 0);
+						await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - $${item.price}`).join('\n')}\n\nYour total is $${total}. Please confirm your order by typing "Yes".`);
+						
+					}else if (message.body.toLowerCase() === 'yes') {
+						await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing the Food Company.');
+					}
+					
 				})
-	
 			});
 		}
 	}

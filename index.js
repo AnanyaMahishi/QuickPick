@@ -43,32 +43,55 @@ async function startBot() {
             // Send the user a list of restaurant options
             await message.reply('Please select a restaurant: \n1. Restaurant A \n2. Restaurant B');
         }
-    })
-    client.on('message',async (message)=>{
+        else{
+            client.on('message',async (message)=>{
 
-        if (message.body === '1' || message.body==='2') 
-        {
-        await message.reply('What do you want?a:Masala Dosa\nb:Chole Bhature');
-        }})
-
-    client.on('message',async (message)=>
-    {
-        if(message.body==='a')
-        {
-            // Store the user's order for Restaurant A in the database
-            const order = { restaurant: 'Restaurant A', order:"Masala Dosa" };
-            await db.collection('orders').insertOne(order);
-            await message.reply('Your order has been received. Thank you!');
+                if (message.body === '1') 
+                {
+                await message.reply('What do you want?1:Masala Dosa\n2:Chole Bhature');
+                client.on('message',async (message)=>
+                {
+                    if(message.body==='a')
+                    {
+                        // Store the user's order for Restaurant A in the database
+                        const order = { restaurant: 'Restaurant A', order:"Masala Dosa" };
+                        await db.collection('orders').insertOne(order);
+                        await message.reply('Your order has been received. Thank you!');
+                    }
+                    if(message.body==='b')
+                    {
+                        // Store the user's order for Restaurant A in the database
+                        const order = { restaurant: 'Restaurant A', order:"Chole Bhature" };
+                        await db.collection('orders').insertOne(order);
+                        await message.reply('Your order has been received. Thank you!');
+                    }
+                })
+            }
+                if (message.body === '2')
+                {
+                    await message.reply('What do you want? \n 1. Fried Rice\n2. Hakka Noodles');
+                    client.on('message', async(message)=>
+                    {
+                        if(message.body==='a')
+                        {
+                            // Store the user's order for Restaurant A in the database
+                            const order = { restaurant: 'Restaurant A', order:"Fried Rice" };
+                            await db.collection('orders').insertOne(order);
+                            await message.reply('Your order has been received. Thank you!');
+                        }
+                        if(message.body==='b')
+                        {
+                            // Store the user's order for Restaurant A in the database
+                            const order = { restaurant: 'Restaurant A', order:"Hakka Noodles" };
+                            await db.collection('orders').insertOne(order);
+                            await message.reply('Your order has been received. Thank you!');
+                        }
+                    })
+                }  
+        })
         }
-        if(message.body==='b')
-        {
-            // Store the user's order for Restaurant A in the database
-            const order = { restaurant: 'Restaurant A', order:"Chole Bhature" };
-            await db.collection('orders').insertOne(order);
-            await message.reply('Your order has been received. Thank you!');
-        }
     })
-
 }
+
 // Start the WhatsApp client
 client.initialize();

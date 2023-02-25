@@ -1,56 +1,74 @@
+// Import required modules
+const { Client } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-const fs = require('fs');
+const MongoClient = require('mongodb').MongoClient;
 
-
-const { Client, LocalAuth} = require('whatsapp-web.js');
-
-const client = new Client({
-    authStrategy: new LocalAuth(),
-  });
-
-const SESSION_FILE_PATH = './session.json';
-
-//const { MongoStore } = require('wwebjs-mongo');
-//const mongoose = require('mongoose');
+// MongoDB connection URL and database name
+const mongoUrl = 'mongodb+srv://quickPick:quickPick@quickpick.kqhqbdn.mongodb.net/test';
+const dbName = 'foodOrders';
 
 
 
+// Create a new MongoDB client
+const mongoClient = new MongoClient(mongoUrl, { useUnifiedTopology: true });
 
-client.on('qr', qr => {
-    qrcode.generate(qr, {small: true});
+// Create a new WhatsApp client
+const client = new Client();
+
+// When the client is ready, generate and display a QR code to authenticate
+client.on('qr', (qr) => {
+    qrcode.generate(qr, { small: true });
 });
 
+// When the client is authenticated, start listening for messages
 client.on('ready', () => {
-    console.log('Client is ready!');
+    console.log("before connect")
+    startBot();
 });
 
+// Start the chatbot
+async function startBot() {
+    // Connect to MongoDB
+    await mongoClient.connect();
+    console.log('Connected to MongoDB');
 
+    // Select the database
+    const db = mongoClient.db(dbName);
+
+    // Listen for new messages
+    client.on('message', async (message) => 
+    {
+        if (message.body === 'menu') 
+        {
+            // Send the user a list of restaurant options
+            await message.reply('Please select a restaurant: \n1. Restaurant A \n2. Restaurant B');
+        }
+    })
+    client.on('message',async (message)=>{
+
+        if (message.body === '1' || message.body==='2') 
+        {
+        await message.reply('What do you want?a:Masala Dosa\nb:Chole Bhature');
+        }})
+
+    client.on('message',async (message)=>
+    {
+        if(message.body==='a')
+        {
+            // Store the user's order for Restaurant A in the database
+            const order = { restaurant: 'Restaurant A', order:"Masala Dosa" };
+            await db.collection('orders').insertOne(order);
+            await message.reply('Your order has been received. Thank you!');
+        }
+        if(message.body==='b')
+        {
+            // Store the user's order for Restaurant A in the database
+            const order = { restaurant: 'Restaurant A', order:"Chole Bhature" };
+            await db.collection('orders').insertOne(order);
+            await message.reply('Your order has been received. Thank you!');
+        }
+    })
+
+}
+// Start the WhatsApp client
 client.initialize();
-
-client.on('message', message => {
-	if(message.body === 'hi') {
-		message.reply('Hello, which vendor would you like to order from today? (pick number) \n\n(1) GJB');
-		client.on('message', message => {
-			if(message.body === '1') {
-				message.reply('Thank you for ordering from GJB today, here is our menu\n(1) Masala dosa\n(2) Idli\n(3) Chole Bhature');
-				client.on('message', message => {
-
-					if(message.body.toLowerCase() === 'masala dosa')
-					{
-						message.reply('1 masala dosa confirmed');
-					}
-
-					if(message.body.toLowerCase() === 'idli')
-					{
-						message.reply('1 idli confirmed');
-					}					
-
-					if(message.body.toLowerCase() === 'chole bhature')
-					{
-						message.reply('1 chole bhature confirmed');
-					}
-				})
-			}
-		});
-	}
-});

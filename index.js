@@ -62,6 +62,7 @@ async function startBot() {
             const items = orderItems.map(index => vendor.menu[index]);
             const total = items.reduce((acc, curr) => acc + curr.price, 0);
             receipt = {
+                restaurant : restaurant,
                 fooditems : items,
                 cost : total
             }

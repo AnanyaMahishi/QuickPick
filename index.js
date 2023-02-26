@@ -52,9 +52,7 @@ async function startBot() {
     {
 		if(message.body === 'Hi') {
 			message.reply('Hello, which vendor would you like to order from today? (type name) \n\nGJB\nPircube\nJuice Point');
-		}
-		else
-		{	client.on('message', async(message) => 
+			client.on('message', async(message) => 
 			{
 				
 				//let namesString = '';
@@ -75,7 +73,7 @@ async function startBot() {
 					else if(message.body.startsWith('/confirm')){
 						
 						const orderItems = message.body.slice(8).split(',').map(item => Number(item.trim()) - 1);
-						const items = orderItems.map(index => vendor.menu.[index]);
+						const items = orderItems.map(index => vendor.menu[index]);
 						const total = items.reduce((acc, curr) => acc + curr.price, 0);
 						await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - $${item.price}`).join('\n')}\n\nYour total is $${total}. Please confirm your order by typing "Yes".`);
 						
@@ -85,7 +83,6 @@ async function startBot() {
 					
 				})
 			});
-		}
 		}
 	}
 	)

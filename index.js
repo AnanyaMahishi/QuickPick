@@ -54,7 +54,7 @@ async function startBot() {
         }
         else if (message.body === '/order') {
             vendor = findObjectByName(bigmenu.vendors, restaurant);
-            await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - $${item.price}`).join('\n')}\n\nPlease reply with /confirm followed by the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
+            await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - ₹${item.price}`).join('\n')}\n\nPlease reply with /confirm followed by the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
         }
         else if (message.body.startsWith('/confirm')) {
 
@@ -66,7 +66,7 @@ async function startBot() {
                 fooditems : items,
                 cost : total
             }
-            await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - $${item.price}`).join('\n')}\n\nYour total is $${total}. Please confirm your order by typing "Yes".`);
+            await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - ₹${item.price}`).join('\n')}\n\nYour total is $${total}. Please confirm your order by typing "Yes".`);
 
         } else if (message.body.toLowerCase() === 'yes') {
             await db.collection('orders').insertOne(receipt);

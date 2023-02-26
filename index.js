@@ -70,7 +70,7 @@ async function startBot() {
 
         } else if (message.body.toLowerCase() === 'yes') {
             await db.collection('orders').insertOne(receipt);
-            await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing the QuickPick.');
+            await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing QuickPick.');
         }
 
         else {

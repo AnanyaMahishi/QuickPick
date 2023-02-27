@@ -61,12 +61,17 @@ async function startBot() {
             const orderItems = message.body.slice(8).split(',').map(item => Number(item.trim()) - 1);
             const items = orderItems.map(index => vendor.menu[index]);
             const total = items.reduce((acc, curr) => acc + curr.price, 0);
+            const date = new Date();
+            const time = date.toLocaleTimeString();
+            const tempid = Math.floor(Math.random()*10000000);
             receipt = {
+                _id : tempid,
                 restaurant : restaurant,
                 fooditems : items,
-                cost : total
+                cost : total,
+                ordertime : time
             }
-            await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - ₹${item.price}`).join('\n')}\n\nYour total is $${total}. Please confirm your order by typing "Yes".`);
+            await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - ₹${item.price}`).join('\n')}\n\nYour total is ₹${total}. Please confirm your order by typing "Yes".`);
 
         } else if (message.body.toLowerCase() === 'yes') {
             await db.collection('orders').insertOne(receipt);
@@ -83,3 +88,4 @@ async function startBot() {
 
 }
 client.initialize();
+    

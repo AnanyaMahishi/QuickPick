@@ -1,6 +1,6 @@
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
-const bigmenu = require('./menu.json');
+// const bigmenu = require('./menu.json');
 const MongoClient = require("mongodb").MongoClient;
 
 // MongoDB connection URL and database name
@@ -38,6 +38,7 @@ async function startBot() {
 
     // Select the database
     const db = mongoClient.db(dbName);
+	 bigmenu = db.collection("menu").find({});
 
     function findObjectByName(arr, name) {
         for (let i = 0; i < arr.length; i++) {

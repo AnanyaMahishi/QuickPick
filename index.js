@@ -79,7 +79,14 @@ async function startBot() {
             await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - ₹${item.price}`).join('\n')}\n\nYour total is ₹${total}. Please confirm your order by typing "Yes".`);
 
         } else if (message.body.toLowerCase() === 'yes') {
-            await db.collection('orders').insertOne(receipt);
+
+            const existingReceipt = await db.collection('orders').findOne({_id: receipt._id});
+            if (existingReceipt) {
+                await db.collection('orders').updateOne({_id: receipt._id}, {$set: receipt});
+            } else {
+                await db.collection('orders').insertOne(receipt);
+            }
+           
             await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing QuickPick.');
         }
 

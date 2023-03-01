@@ -68,8 +68,9 @@ async function startBot() {
             const total = items.reduce((acc, curr) => acc + curr.price, 0);
             const date = new Date();
             const time = date.toLocaleTimeString();
+            
             receipt = {
-                _id: ObjectId(),
+                _id: new ObjectId(),
                 restaurant: restaurant,
                 fooditems: items,
                 cost: total,

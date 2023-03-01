@@ -88,6 +88,8 @@ async function startBot() {
                     cost: total,
                     ordertime: time
                 }
+
+                console.log(userStore);
                 await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - ₹${item.price}`).join('\n')}\n\nYour total is ₹${total}. Please confirm your order by typing "Yes".`);
                 client.on('message', async message => {
                     message.body.toLowerCase() === "yes"

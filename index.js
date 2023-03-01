@@ -50,7 +50,7 @@ async function startBot() {
     // Listen for new messages
     client.on('message', async message => {
         if (message.body === 'Hi') {
-            message.reply('Hello, which vendor would you like to order from today? (type name) \n\nGJB\nPircube\nJuice Point');
+            message.reply(`Here's our menu:\n\n${bigmenu.vendors.map((single, index) => `${index + 1}. ${single.name}`).join('\n')}\n\n.`);
         }
         else if (message.body === '/order') {
             vendor = findObjectByName(bigmenu.vendors, restaurant);

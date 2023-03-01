@@ -83,13 +83,15 @@ async function startBot() {
                 const chatId = message.from;
                 let receipt = {
                     _id: new ObjectId(),
-                    restaurant: userStore[chatId],
+                    restaurant: chatId,
                     fooditems: items,
                     cost: total,
                     ordertime: time
                 }
 
                 console.log(receipt);
+
+                console.log(userStore);
                 await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - ₹${item.price}`).join('\n')}\n\nYour total is ₹${total}. Please confirm your order by typing "Yes".`);
                 client.on('message', async message => {
                     message.body.toLowerCase() === "yes"

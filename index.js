@@ -61,6 +61,13 @@ async function startBot() {
             vendor = findObjectByName(bigmenu.vendors, restaurant);
             await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - ₹${item.price}`).join('\n')}\n\nPlease reply with /confirm followed by the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
         }
+        else if (message.body.startsWith('/pick')) {
+
+            const orderRes = Number(message.body.slice(5).trim() - 1);
+            const restaurant = bigmenu.vendors[orderRes].name;
+            
+            client.sendMessage(message.from, 'Your restaurant has been selected, type /order to start ordering now.');
+        }
         else if (message.body.startsWith('/confirm')) {
 
             const orderItems = message.body.slice(8).split(',').map(item => Number(item.trim()) - 1);
@@ -94,12 +101,6 @@ async function startBot() {
             await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing QuickPick.');
         } */
 
-        else {
-
-            restaurant = message.body;
-
-            client.sendMessage(message.from, "Type /order to start ordering now, /confirm when you're done");
-        }
     })
 
 }

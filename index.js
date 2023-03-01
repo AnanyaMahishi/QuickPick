@@ -53,6 +53,9 @@ async function startBot() {
         return null;
     }
     // Listen for new messages
+    {
+        let restaurant;
+    
     client.on('message', async message => {
         if (message.body === 'Hi') {
             message.reply(`Pick a vendor :\n\n${bigmenu.vendors.map((single, index) => `${index + 1}. ${single.name}`).join('\n')}\n Use the command /pick followed by a number to pick the restaurant (eg. /pick 1,2,3)`);
@@ -60,7 +63,7 @@ async function startBot() {
         else if (message.body.startsWith('/pick')) {
             
             const orderRes = Number(message.body.slice(5).trim() - 1);
-            const restaurant = bigmenu.vendors[orderRes].name;
+            restaurant = bigmenu.vendors[orderRes].name;
             vendor = findObjectByName(bigmenu.vendors, restaurant);
             await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - ₹${item.price}`).join('\n')}\n\nPlease reply with /confirm followed by the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
             
@@ -95,11 +98,13 @@ async function startBot() {
             } else {
                 await db.collection('orders').insertOne(receipt);
             }
-           
+        
             await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing QuickPick.');
         } */
 
     })
+
+    }
 
 }
 client.initialize();

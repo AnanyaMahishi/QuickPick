@@ -55,18 +55,16 @@ async function startBot() {
     // Listen for new messages
     client.on('message', async message => {
         if (message.body === 'Hi') {
-            message.reply(`Here's our menu:\n\n${bigmenu.vendors.map((single, index) => `${index + 1}. ${single.name}`).join('\n')}\n Use the command /pick followed by a number to pick the restaurant (eg. /pick 1,2,3)`);
-        }
-        else if (message.body === '/order') {
-            vendor = findObjectByName(bigmenu.vendors, restaurant);
-            await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - ₹${item.price}`).join('\n')}\n\nPlease reply with /confirm followed by the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
+            message.reply(`Pick a vendor :\n\n${bigmenu.vendors.map((single, index) => `${index + 1}. ${single.name}`).join('\n')}\n Use the command /pick followed by a number to pick the restaurant (eg. /pick 1,2,3)`);
         }
         else if (message.body.startsWith('/pick')) {
-
+            
             const orderRes = Number(message.body.slice(5).trim() - 1);
             const restaurant = bigmenu.vendors[orderRes].name;
+            vendor = findObjectByName(bigmenu.vendors, restaurant);
+            await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - ₹${item.price}`).join('\n')}\n\nPlease reply with /confirm followed by the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
             
-            client.sendMessage(message.from, 'Your restaurant has been selected, type /order to start ordering now.');
+            client.sendMessage(message.from, 'Your restaurant has been selected, type /confirm to start ordering now.');
         }
         else if (message.body.startsWith('/confirm')) {
 

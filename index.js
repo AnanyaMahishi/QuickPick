@@ -39,6 +39,7 @@ async function startBot() {
     // Select the database
     const db = mongoClient.db(dbName);
 	 bigmenu = db.collection("menu").find({});
+	 console.log(bigmenu);
 
     function findObjectByName(arr, name) {
         for (let i = 0; i < arr.length; i++) {

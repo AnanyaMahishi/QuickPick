@@ -1,7 +1,7 @@
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 // const bigmenu = require('./menu.json');
-const MongoClient = require("mongodb").MongoClient;
+const { MongoClient, ObjectId } = require("mongodb");
 
 // MongoDB connection URL and database name
 const mongoUrl = 'mongodb+srv://quickPick:quickPick@quickpick.kqhqbdn.mongodb.net/test';
@@ -38,8 +38,11 @@ async function startBot() {
 
     // Select the database
     const db = mongoClient.db(dbName);
-	 bigmenu = db.collection("menu").find({_id : ObjectId("63ff543d154096f676d6e615")});
-	 console.log(bigmenu);
+    menu = db.collection("menu")
+    const bigmenu=await menu.findOne({})
+
+
+
 
     function findObjectByName(arr, name) {
         for (let i = 0; i < arr.length; i++) {
@@ -65,13 +68,13 @@ async function startBot() {
             const total = items.reduce((acc, curr) => acc + curr.price, 0);
             const date = new Date();
             const time = date.toLocaleTimeString();
-            const tempid = Math.floor(Math.random()*10000000);
+            const tempid = Math.floor(Math.random() * 10000000);
             receipt = {
-                _id : tempid,
-                restaurant : restaurant,
-                fooditems : items,
-                cost : total,
-                ordertime : time
+                _id: tempid,
+                restaurant: restaurant,
+                fooditems: items,
+                cost: total,
+                ordertime: time
             }
             await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - ₹${item.price}`).join('\n')}\n\nYour total is ₹${total}. Please confirm your order by typing "Yes".`);
 
@@ -90,4 +93,3 @@ async function startBot() {
 
 }
 client.initialize();
-    

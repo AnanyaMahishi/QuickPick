@@ -67,7 +67,7 @@ async function startBot() {
                 const orderRes = Number(message.body.slice(5).trim() - 1);
                 const restaurant = bigmenu.vendors[orderRes].name;
                 const chatId = message.from;
-                receipt[chatId] = restaurant;
+                userStore[chatId] = restaurant;
                 vendor = findObjectByName(bigmenu.vendors, restaurant);
                 await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - ₹${item.price}`).join('\n')}\n\nPlease reply with /confirm followed by the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
                 

@@ -65,10 +65,9 @@ async function startBot() {
             await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - ₹${item.price}`).join('\n')}\n\nPlease reply with /confirm followed by the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
             
             client.sendMessage(message.from, 'Your restaurant has been selected, type /confirm to start ordering now.');
-            client.on('message', async message=>{
-                if(message.body.startsWith('/confirm'))
-                {
-                    
+        }
+        else if (message.body.startsWith('/confirm')) {
+
             const orderItems = message.body.slice(8).split(',').map(item => Number(item.trim()) - 1);
             const items = orderItems.map(index => vendor.menu[index]);
             const total = items.reduce((acc, curr) => acc + curr.price, 0);
@@ -88,10 +87,7 @@ async function startBot() {
                 await db.collection('orders').insertOne(receipt);
                 await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing QuickPick.');
             })
-                }
-            })
-        }
-         /* else if (message.body.toLowerCase() === 'yes') {
+        } /* else if (message.body.toLowerCase() === 'yes') {
 
             const existingReceipt = await db.collection('orders').findOne({_id: receipt._id});
             if (existingReceipt) {

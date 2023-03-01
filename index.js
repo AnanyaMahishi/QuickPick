@@ -69,16 +69,17 @@ async function startBot() {
             const date = new Date();
             const time = date.toLocaleTimeString();
             
-            receipt = {
+            let receipt = {
                 _id: new ObjectId(),
                 restaurant: restaurant,
                 fooditems: items,
                 cost: total,
                 ordertime: time
             }
+            await db.collection('orders').insertOne(receipt);
             await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - ₹${item.price}`).join('\n')}\n\nYour total is ₹${total}. Please confirm your order by typing "Yes".`);
-
-        } else if (message.body.toLowerCase() === 'yes') {
+            await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing QuickPick.');
+        } /* else if (message.body.toLowerCase() === 'yes') {
 
             const existingReceipt = await db.collection('orders').findOne({_id: receipt._id});
             if (existingReceipt) {
@@ -88,7 +89,7 @@ async function startBot() {
             }
            
             await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing QuickPick.');
-        }
+        } */
 
         else {
 

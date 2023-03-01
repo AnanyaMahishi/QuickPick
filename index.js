@@ -83,7 +83,7 @@ async function startBot() {
                 const chatId = message.from;
                 let receipt = {
                     _id: new ObjectId(),
-                    restaurant: chatId,
+                    restaurant: userStore[chatId],
                     fooditems: items,
                     cost: total,
                     ordertime: time

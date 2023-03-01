@@ -7,6 +7,9 @@ const { MongoClient, ObjectId } = require("mongodb");
 const mongoUrl = 'mongodb+srv://quickPick:quickPick@quickpick.kqhqbdn.mongodb.net/test';
 const dbName = 'foodOrders';
 
+userStore = {
+    
+}
 
 
 // Create a new MongoDB client
@@ -53,58 +56,57 @@ async function startBot() {
         return null;
     }
     // Listen for new messages
-    {
-        let restaurant;
     
-    client.on('message', async message => {
-        if (message.body === 'Hi') {
-            message.reply(`Pick a vendor :\n\n${bigmenu.vendors.map((single, index) => `${index + 1}. ${single.name}`).join('\n')}\n Use the command /pick followed by a number to pick the restaurant (eg. /pick 1,2,3)`);
-        }
-        else if (message.body.startsWith('/pick')) {
-            
-            const orderRes = Number(message.body.slice(5).trim() - 1);
-            restaurant = bigmenu.vendors[orderRes].name;
-            vendor = findObjectByName(bigmenu.vendors, restaurant);
-            await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - ₹${item.price}`).join('\n')}\n\nPlease reply with /confirm followed by the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
-            
-            client.sendMessage(message.from, 'Your restaurant has been selected, type /confirm to start ordering now.');
-        }
-        else if (message.body.startsWith('/confirm')) {
-
-            const orderItems = message.body.slice(8).split(',').map(item => Number(item.trim()) - 1);
-            const items = orderItems.map(index => vendor.menu[index]);
-            const total = items.reduce((acc, curr) => acc + curr.price, 0);
-            const date = new Date();
-            const time = date.toLocaleTimeString();
-            
-            let receipt = {
-                _id: new ObjectId(),
-                restaurant: restaurant,
-                fooditems: items,
-                cost: total,
-                ordertime: time
+        client.on('message', async message => {
+            if (message.body === 'Hi') {
+                
+                message.reply(`Pick a vendor :\n\n${bigmenu.vendors.map((single, index) => `${index + 1}. ${single.name}`).join('\n')}\n Use the command /pick followed by a number to pick the restaurant (eg. /pick 1,2,3)`);
             }
-            await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - ₹${item.price}`).join('\n')}\n\nYour total is ₹${total}. Please confirm your order by typing "Yes".`);
-            client.on('message', async message => {
-                message.body.toLowerCase() === "yes"
-                await db.collection('orders').insertOne(receipt);
+            else if (message.body.startsWith('/pick')) {
+                
+                const orderRes = Number(message.body.slice(5).trim() - 1);
+                const restaurant = bigmenu.vendors[orderRes].name;
+                const chatId = message.chat.id._serialized;
+                receipt[chatId] = restaurant;
+                vendor = findObjectByName(bigmenu.vendors, restaurant);
+                await client.sendMessage(message.from, `Here's our menu:\n\n${vendor.menu.map((item, index) => `${index + 1}. ${item.name} - ₹${item.price}`).join('\n')}\n\nPlease reply with /confirm followed by the numbers of the items you want to order separated by commas (e.g. 1,3,4).`);
+                
+                client.sendMessage(message.from, 'Your restaurant has been selected, type /confirm to start ordering now.');
+            }
+            else if (message.body.startsWith('/confirm')) {
+
+                const orderItems = message.body.slice(8).split(',').map(item => Number(item.trim()) - 1);
+                const items = orderItems.map(index => vendor.menu[index]);
+                const total = items.reduce((acc, curr) => acc + curr.price, 0);
+                const date = new Date();
+                const time = date.toLocaleTimeString();
+                const chatId = message.chat.id._serialized;
+                let receipt = {
+                    _id: new ObjectId(),
+                    restaurant: userStore[chatId],
+                    fooditems: items,
+                    cost: total,
+                    ordertime: time
+                }
+                await client.sendMessage(message.from, `Great, you have ordered:\n\n${items.map(item => `${item.name} - ₹${item.price}`).join('\n')}\n\nYour total is ₹${total}. Please confirm your order by typing "Yes".`);
+                client.on('message', async message => {
+                    message.body.toLowerCase() === "yes"
+                    await db.collection('orders').insertOne(receipt);
+                    await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing QuickPick.');
+                })
+            } /* else if (message.body.toLowerCase() === 'yes') {
+
+                const existingReceipt = await db.collection('orders').findOne({_id: receipt._id});
+                if (existingReceipt) {
+                    await db.collection('orders').updateOne({_id: receipt._id}, {$set: receipt});
+                } else {
+                    await db.collection('orders').insertOne(receipt);
+                }
+            
                 await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing QuickPick.');
-            })
-        } /* else if (message.body.toLowerCase() === 'yes') {
+            } */
 
-            const existingReceipt = await db.collection('orders').findOne({_id: receipt._id});
-            if (existingReceipt) {
-                await db.collection('orders').updateOne({_id: receipt._id}, {$set: receipt});
-            } else {
-                await db.collection('orders').insertOne(receipt);
-            }
-        
-            await client.sendMessage(message.from, 'Your order has been confirmed! Thank you for choosing QuickPick.');
-        } */
-
-    })
-
-    }
+        })
 
 }
 client.initialize();

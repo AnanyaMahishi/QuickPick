@@ -68,9 +68,8 @@ async function startBot() {
             const total = items.reduce((acc, curr) => acc + curr.price, 0);
             const date = new Date();
             const time = date.toLocaleTimeString();
-            const tempid = Math.floor(Math.random() * 10000000);
             receipt = {
-                _id: tempid,
+                _id: ObjectId(),
                 restaurant: restaurant,
                 fooditems: items,
                 cost: total,

@@ -1,5 +1,8 @@
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
+const Razorpay = require('razorpay');
+
+
 // const bigmenu = require('./menu.json');
 const { MongoClient, ObjectId } = require("mongodb");
 
@@ -75,12 +78,38 @@ async function startBot() {
             }
             else if (message.body.startsWith('/confirm')) {
 
+                
                 const orderItems = message.body.slice(8).split(',').map(item => Number(item.trim()) - 1);
                 const items = orderItems.map(index => vendor.menu[index]);
                 const total = items.reduce((acc, curr) => acc + curr.price, 0);
                 const date = new Date();
                 const time = date.toLocaleTimeString();
                 const chatId = message.from;
+
+                //Payment code
+                var instance = new Razorpay({
+                    key_id: 'rzp_test_lwRQUtpiJFKv77',
+                    key_secret: 'SVdjEp6cQjDIead0Ann7ClIR',
+                  })
+
+
+                  instance.payments.fetch(paymentId);
+
+                  var options = {
+                    
+                    amount: total,  // amount in the smallest currency unit
+                    currency: "INR",
+                    receipt: "order_rcptid_11"
+                  };
+
+                  instance.orders.create(options, function(err, order) {
+                    console.log(order);
+                  });
+
+
+                  //End of payment code
+
+
                 let receipt = {
                     _id: new ObjectId(),
                     restaurant: userStore[chatId],

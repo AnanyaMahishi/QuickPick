@@ -108,38 +108,28 @@ async function startBot() {
                     vendor_upi_id: vendor.upi,
                 },
             };
-            razorpay.orders.create(paymentOptions, (err, order) => {
-                const paymentLink = order.short_url;
+            const payment = razorpay.orders.create(paymentOptions);
+            const paymentLink = payment.short_url;
 
+            console.log("receipt that is uploaded to db", foodReceipt);
+            console.log("user state object", userStore);
 
+            await client.sendMessage(
+                message.from,
+                `Great, you have ordered:\n\n${items
+                    .map((item) => `${item.name} - ₹${item.price}`)
+                    .join("\n")}\n\nYour total is ₹${total}..`
+            );
+            await client.sendMessage(message.from, paymentLink);
+            const currPay = razorpay.payments.fetch(payment.id);
 
-                client.sendMessage(message.from, paymentLink);
-                razorpay.payments.fetch(order.id, (err, orderState) => {
-
-                    if (err) throw err;
-
-                    if (orderState.currPay.error === undefined) {
-                        db.collection("orders").insertOne(foodReceipt);
-                        client.sendMessage(
-                            message.from,
-                            "Your order has been confirmed! Thank you for choosing QuickPick."
-                        );
-                    }
-
-                    console.log("user state object", userStore);
-                    console.log("receipt that is uploaded to db", foodReceipt);
-                    client.sendMessage(
-                        message.from,
-                        `Great, you have ordered:\n\n${items
-                            .map((item) => `${item.name} - ₹${item.price}`)
-                            .join("\n")}\n\nYour total is ₹${total}..`
-                    );
-                })
-
-            });
-
-
-
+            if (currPay.error === undefined) {
+                await db.collection("orders").insertOne(foodReceipt);
+                await client.sendMessage(
+                    message.from,
+                    "Your order has been confirmed! Thank you for choosing QuickPick."
+                );
+            }
         }
     });
 }

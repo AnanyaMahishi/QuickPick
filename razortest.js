@@ -18,9 +18,20 @@ var instance = new Razorpay({
     receipt: "order_rcptid_11"
   };
 
-  instance.orders.create(options, function(err, order) {
-    console.log(order);
-  });
+  if(true)
+  
+  {
+    instance.orders.create(options, function(err, order) {
+
+  
+    
+  
+    })
+  
+  }
+
+
+  
 
 
   //End of payment code

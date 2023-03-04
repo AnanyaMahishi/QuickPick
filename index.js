@@ -1,7 +1,13 @@
 const qrcode = require("qrcode-terminal");
-// const bigmenu = require('./menu.json');
+const express = require('express')
 const { MongoClient, ObjectId } = require("mongodb");
 const Razorpay = require("razorpay");
+const bodyParser = require('body-parser');
+const app = express();
+const port = 3002;
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 
 // MongoDB connection URL and database name
 const mongoUrl =
@@ -99,38 +105,58 @@ async function startBot() {
                 cost: total,
                 ordertime: time,
             };
+            //console.log("in food receipt",typeof(foodReceipt._id),String(foodReceipt._id))
             const paymentOptions = {
-                amount: total,
+                amount: total*100,
                 currency: "INR",
-                receipt: foodReceipt._id,
-                payment_capture: 1,
+                description: 'Payment for vendor ',
                 notes: {
-                    vendor_upi_id: vendor.upi,
+                    id:foodReceipt._id,
+                },
+                customer: {
+                    name: 'John Doe',
+                    email: 'johndoe@example.com',
                 },
             };
-            const payment = razorpay.orders.create(paymentOptions);
-            const paymentLink = payment.short_url;
-
-            console.log("receipt that is uploaded to db", foodReceipt);
-            console.log("user state object", userStore);
-
             await client.sendMessage(
                 message.from,
                 `Great, you have ordered:\n\n${items
                     .map((item) => `${item.name} - ₹${item.price}`)
                     .join("\n")}\n\nYour total is ₹${total}..`
             );
-            await client.sendMessage(message.from, paymentLink);
-            const currPay = razorpay.payments.fetch(payment.id);
+            razorpay.paymentLink.create(paymentOptions, (err, linkobj) => {
 
-            if (currPay.error === undefined) {
-                await db.collection("orders").insertOne(foodReceipt);
-                await client.sendMessage(
-                    message.from,
-                    "Your order has been confirmed! Thank you for choosing QuickPick."
-                );
-            }
+                link = linkobj.short_url;
+                let id = linkobj.id
+                //console.log(id)
+                //console.log(link)
+                client.sendMessage(message.from, link)
+
+            });
+            app.post('/', async (req, res) => {
+                const event = req.body.event;
+                const data = req.body.payload;
+                //console.log(typeof(data.payment.entity.notes.id))
+                console.log("this is server endpoint",data.payment.entity.notes.id,String(foodReceipt._id))
+
+                if (event === 'payment_link.paid' && data.payment.entity.notes.id===String(foodReceipt._id)) {
+                    await db.collection("orders").insertOne(foodReceipt);
+                    await client.sendMessage(
+                        message.from,
+                        "Your order has been confirmed! Thank you for choosing QuickPick."
+                    );
+
+                }
+
+                res.sendStatus(200);
+            })
+            //console.log("receipt that is uploaded to db", foodReceipt);
+            //console.log("user state object", userStore);
         }
+
     });
 }
 client.initialize();
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+});

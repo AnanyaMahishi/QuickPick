@@ -59,21 +59,4 @@ app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });
 
-// handle payment success webhook event
-/* instance.webhooks.on('payment.link.authorized', async (paymentLink) => {
-    // payment link authorized event received, do something
-    const paymentId = paymentLink.entity.id;
-    const payment = await razorpay.payments.fetch(paymentId);
-    // check if payment is successful
-    if (payment.status === 'captured') {
-        // payment is successful, do something
-        const vendorId = paymentLink.entity.vendor.id;
-        const amount = paymentLink.entity.amount / 100; // convert back to rupees
-        console.log(`Payment of INR ${amount} for vendor ${vendorId} is successful.`);
-        // do something with the payment
-    } else {
-        // payment failed, do something
-        console.log(`Payment of INR ${amount} for vendor ${vendorId} has failed.`);
-        // do something with the payment failure
-    }
-}); */
+

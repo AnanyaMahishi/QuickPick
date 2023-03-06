@@ -27,6 +27,8 @@ const { Client } = require("whatsapp-web.js");
 
 const client = new Client();
 
+
+
 //const { MongoStore } = require('wwebjs-mongo');
 //const mongoose = require('mongoose');
 
@@ -57,7 +59,29 @@ async function startBot() {
         }
         return null;
     }
-    // Listen for new messages
+    
+
+    app.post('/', async (req, res) => {
+        //console.log(foodReceipt)
+        const event = req.body.event;
+        const data = req.body.payload;
+        //console.log(typeof(data.payment.entity.notes.id))
+        //console.log("this is server endpoint",data.payment.entity.notes.id,String(foodReceipt._id))
+    
+        if (event === 'payment_link.paid') {
+            console.log("food:", data.payment.entity.notes.food)
+            console.log("in post",JSON.parse(data.payment.entity.notes.food))
+            await db.collection("orders").insertOne(JSON.parse(data.payment.entity.notes.food));
+            await client.sendMessage(
+                data.payment.entity.notes.user,
+                "Your order has been confirmed! Thank you for choosing QuickPick."
+            );
+            let chatId=data.payment.entity.notes.user
+            delete userStore[chatId]
+        }
+    
+        res.sendStatus(200);
+    })
 
     client.on("message", async (message) => {
         if (message.body === "Hi") {
@@ -68,7 +92,9 @@ async function startBot() {
                         "\n"
                     )}\n Use the command /pick followed by a number to pick the restaurant (eg. /pick 1,2,3)`
             );
-        } else if (message.body.startsWith("/pick")) {
+        } 
+        
+        else if (message.body.startsWith("/pick")) {
             const orderRes = Number(message.body.slice(5).trim() - 1);
             const restaurant = bigmenu.vendors[orderRes].name;
             const chatId = message.from;
@@ -87,7 +113,10 @@ async function startBot() {
                 message.from,
                 "Your restaurant has been selected, type /confirm to start ordering now."
             );
-        } else if (message.body.startsWith("/confirm")) {
+        } 
+        
+        
+        else if (message.body.startsWith("/confirm")) {
             const orderItems = message.body
                 .slice(8)
                 .split(",")
@@ -105,19 +134,21 @@ async function startBot() {
                 cost: total,
                 ordertime: time,
             };
-            //console.log("in food receipt",typeof(foodReceipt._id),String(foodReceipt._id))
             const paymentOptions = {
                 amount: total*100,
                 currency: "INR",
                 description: 'Payment for vendor ',
                 notes: {
                     id:foodReceipt._id,
+                    food:JSON.stringify(foodReceipt),
+                    user:message.from,
                 },
                 customer: {
                     name: 'John Doe',
                     email: 'johndoe@example.com',
                 },
             };
+            console.log(paymentOptions.notes.food)
             await client.sendMessage(
                 message.from,
                 `Great, you have ordered:\n\n${items
@@ -127,29 +158,10 @@ async function startBot() {
             razorpay.paymentLink.create(paymentOptions, (err, linkobj) => {
 
                 link = linkobj.short_url;
-                let id = linkobj.id
-                //console.log(id)
+                //console.log(linkobj)
                 //console.log(link)
                 client.sendMessage(message.from, link)
-
             });
-            app.post('/', async (req, res) => {
-                const event = req.body.event;
-                const data = req.body.payload;
-                //console.log(typeof(data.payment.entity.notes.id))
-                console.log("this is server endpoint",data.payment.entity.notes.id,String(foodReceipt._id))
-
-                if (event === 'payment_link.paid' && data.payment.entity.notes.id===String(foodReceipt._id)) {
-                    await db.collection("orders").insertOne(foodReceipt);
-                    await client.sendMessage(
-                        message.from,
-                        "Your order has been confirmed! Thank you for choosing QuickPick."
-                    );
-
-                }
-
-                res.sendStatus(200);
-            })
             //console.log("receipt that is uploaded to db", foodReceipt);
             //console.log("user state object", userStore);
         }

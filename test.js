@@ -19,13 +19,22 @@ const options = {
     currency: 'INR',
     description: 'Payment for vendor ',
     notes: {
-        id:"12ar33",
+        id: "12ar33",
     },
     customer: {
         name: 'John Doe',
         email: 'johndoe@example.com',
     },
-    
+    options: {
+        order: [
+            {
+                vpa:"8095300313@paytm",
+                amount: 1000,
+                currency: "INR",
+            }
+        ]
+    },
+
 };
 
 instance.paymentLink.create(options, (err, linkobj) => {

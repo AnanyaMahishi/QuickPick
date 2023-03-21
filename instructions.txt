@@ -1,3 +1,11 @@
 1)run index.js on cmd  
 2)ngrok http localhost:3002 (from ngrok app)
 3)npm start quickpick vendor
+
+
+
+AUTH0_SECRET=qjfhcytskcjydghapodfbqwcbcvnvhgu
+AUTH0_BASE_URL='http://localhost:3000'
+AUTH0_ISSUER_BASE_URL='https://dev-sv7fnbsl4nv8qque.us.auth0.com'
+AUTH0_CLIENT_ID='cDS8Pm4iSRVMgjhhu5epM7cediRQZdDK'
+AUTH0_CLIENT_SECRET='xGPMyZQhZk4eZrKdD5A2JwwAQmu1KsIA4zHgPoTa05mrzIZsxq4lU7vBIDAh3SOF'

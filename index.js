@@ -33,6 +33,7 @@ const client = new Client();
 //const mongoose = require('mongoose');
 
 client.on("qr", (qr) => {
+    //startBot();
     qrcode.generate(qr, { small: true });
 });
 
@@ -53,7 +54,15 @@ async function startBot() {
     // Select the database
     const db = mongoClient.db(dbName);
     menu = db.collection("menu");
-    const bigmenu = await menu.findOne({});
+    /* const bigmenu = await menu.findOne({});
+    console.log(allRestaurants); */
+
+    const documents = await menu.find({}, { projection: { restaurants: 1, _id: 0 } }).toArray();
+    const allRestaurants = documents.reduce((accumulator, currentDocument) => {
+        return accumulator.concat(currentDocument.restaurants);
+    }, []);
+    allRestaurants.shift();
+    console.log(allRestaurants)
 
     function findObjectByName(arr, name) {
         for (let i = 0; i < arr.length; i++) {
@@ -90,7 +99,7 @@ async function startBot() {
     client.on("message", async (message) => {
         if (message.body === "Hi") {
             message.reply(
-                `Pick a vendor :\n\n${bigmenu.vendors
+                `Pick a vendor :\n\n${allRestaurants
                     .map((single, index) => `${index + 1}. ${single.name}`)
                     .join(
                         "\n"
@@ -100,10 +109,10 @@ async function startBot() {
         
         else if (message.body.startsWith("/pick")) {
             const orderRes = Number(message.body.slice(5).trim() - 1);
-            const restaurant = bigmenu.vendors[orderRes].name;
+            const restaurant = allRestaurants[orderRes].name;
             const chatId = message.from;
             userStore[chatId] = restaurant;
-            const vendor = findObjectByName(bigmenu.vendors, restaurant);
+            const vendor = findObjectByName(allRestaurants, restaurant);
             await client.sendMessage(
                 message.from,
                 `Here's our menu:\n\n${vendor.menu
@@ -126,7 +135,7 @@ async function startBot() {
                 .split(",")
                 .map((item) => Number(item.trim()) - 1);
             const chatId = message.from;
-            const vendor = findObjectByName(bigmenu.vendors, userStore[chatId]);
+            const vendor = findObjectByName(allRestaurants, userStore[chatId]);
             const items = orderItems.map((index) => vendor.menu[index]);
             const total = items.reduce((acc, curr) => acc + curr.price, 0);
             const date = new Date();

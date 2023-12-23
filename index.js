@@ -41,6 +41,10 @@ client.on("ready", () => {
     startBot();
 });
 
+client.on("error", (err) => {
+    console.log("Client error!", err);
+});
+
 async function startBot() {
     // Connect to MongoDB
     await mongoClient.connect();

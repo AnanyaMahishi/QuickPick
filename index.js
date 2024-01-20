@@ -39,7 +39,7 @@ client.on("qr", (qr) => {
 
 client.on("ready", () => {
     console.log("Client is ready!");
-    startBot();
+    startBot()
 });
 
 client.on("error", (err) => {
@@ -57,12 +57,19 @@ async function startBot() {
     /* const bigmenu = await menu.findOne({});
     console.log(allRestaurants); */
 
-    const documents = await menu.find({}, { projection: { restaurants: 1, _id: 0 } }).toArray();
-    const allRestaurants = documents.reduce((accumulator, currentDocument) => {
-        return accumulator.concat(currentDocument.restaurants);
-    }, []);
-    allRestaurants.shift();
-    console.log(allRestaurants)
+    let allRestaurants = [];
+
+    async function fetchRestaurants() {
+        const documents = await menu.find({}, { projection: { restaurants: 1, _id: 0 } }).toArray();
+        allRestaurants = documents.reduce((accumulator, currentDocument) => {
+            return accumulator.concat(currentDocument.restaurants);
+        }, []);
+        // Do something with allRestaurants
+    }
+    
+    // Call fetchRestaurants every 15 seconds
+    fetchRestaurants();
+    setInterval(fetchRestaurants, 15000);
 
     function findObjectByName(arr, name) {
         for (let i = 0; i < arr.length; i++) {
@@ -177,6 +184,17 @@ async function startBot() {
             });
             //console.log("receipt that is uploaded to db", foodReceipt);
             //console.log("user state object", userStore);
+
+            //to be removed
+
+                //wait for 3 seconds
+            
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            await db.collection("orders").insertOne(foodReceipt);
+            await client.sendMessage(
+                message.from,
+                "Your order has been confirmed! Thank you for choosing QuickPick."
+            );
         }
 
     });

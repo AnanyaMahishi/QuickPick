@@ -136,10 +136,23 @@ async function startBot() {
                 .map((item) => Number(item.trim()) - 1);
             const chatId = message.from;
             const vendor = findObjectByName(allRestaurants, userStore[chatId]);
-            const items = orderItems.map((index) => vendor.menu[index]);
-            const total = items.reduce((acc, curr) => acc + curr.price, 0);
+            const items = {};
+            orderItems.forEach((item) => {
+                items[item] = vendor.menu[item];
+                if(items[item]){
+                    items[item]++;
+                }
+                else{
+                    items[item]=1;
+                }
+            });
+            console.log(items);
+            const total = Object.keys(items).reduce((acc, curr) => {
+                const itemPrice = vendor.menu.find(item => item === curr).price;
+                return acc + itemPrice * items[curr];
+            }, 0);
             const date = new Date();
-            const time = date
+            const time = date;
             const foodReceipt = {
                 created_at: time,
                 restaurant_id: userStore[chatId],

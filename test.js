@@ -8,8 +8,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const instance = new Razorpay({
-    key_id: "rzp_test_lwRQUtpiJFKv77",
-    key_secret: "SVdjEp6cQjDIead0Ann7ClIR",
+    key_id: "rzp_test_TwKDUjk8RL0wvs",
+    key_secret: "IIOFpUc3OcW0eTXQ8sUHoSrv",
 });
 
 // create payment link for a particular vendor
@@ -37,15 +37,9 @@ const options = {
 
 };
 
-instance.paymentLink.create(options, (err, linkobj) => {
-
-    link = linkobj.short_url;
-    let id = linkobj.id
-    console.log(id)
-    console.log(link)
-
-});
-
+let link = instance.paymentLink.create(options).short_url;
+console.log(link)
+client.sendMessage(message.from, link)
 
 
 

@@ -1,6 +1,5 @@
 const qrcode = require("qrcode-terminal");
 const express = require('express')
-const { MongoClient, ObjectId } = require("mongodb");
 const Razorpay = require("razorpay");
 const bodyParser = require('body-parser');
 const app = express();
@@ -8,24 +7,30 @@ const port = 3002;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// FireStore Admin SDK
+const admin = require("firebase-admin");
+const serviceAccount = require("./ServiceAccountKey.json");
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+});
+const db = admin.firestore();
 
-// MongoDB connection URL and database name
-const mongoUrl =
-    "mongodb+srv://quickPick:quickPick@quickpick.kqhqbdn.mongodb.net/test";
-const dbName = "foodOrders";
 
 userStore = {};
 const razorpay = new Razorpay({
-    key_id: "rzp_test_lwRQUtpiJFKv77",
-    key_secret: "SVdjEp6cQjDIead0Ann7ClIR",
+    key_id: "rzp_test_TwKDUjk8RL0wvs",
+    key_secret: "IIOFpUc3OcW0eTXQ8sUHoSrv",
 });
 
 // Create a new MongoDB client
-const mongoClient = new MongoClient(mongoUrl, { useUnifiedTopology: true });
 
 const { Client } = require("whatsapp-web.js");
 
-const client = new Client();
+const client = new Client({
+    puppeteer: {
+        args: ["--no-sandbox"],
+    }
+});
 
 
 
@@ -39,7 +44,7 @@ client.on("qr", (qr) => {
 
 client.on("ready", () => {
     console.log("Client is ready!");
-    startBot()
+    startBot();
 });
 
 client.on("error", (err) => {
@@ -47,29 +52,17 @@ client.on("error", (err) => {
 });
 
 async function startBot() {
-    // Connect to MongoDB
-    await mongoClient.connect();
-    console.log("Connected to MongoDB");
-
-    // Select the database
-    const db = mongoClient.db(dbName);
-    menu = db.collection("menu");
     /* const bigmenu = await menu.findOne({});
     console.log(allRestaurants); */
 
-    let allRestaurants = [];
-
-    async function fetchRestaurants() {
-        const documents = await menu.find({}, { projection: { restaurants: 1, _id: 0 } }).toArray();
-        allRestaurants = documents.reduce((accumulator, currentDocument) => {
-            return accumulator.concat(currentDocument.restaurants);
-        }, []);
-        // Do something with allRestaurants
-    }
-    
-    // Call fetchRestaurants every 15 seconds
-    fetchRestaurants();
-    setInterval(fetchRestaurants, 15000);
+    // const documents = await menu.find({}, { projection: { restaurants: 1, _id: 0 } }).toArray();
+    let allRestaurants = await db.collection("restaurants").get();
+    allRestaurants = allRestaurants.docs.map((doc) => doc.data());
+    // const allRestaurants = documents.reduce((accumulator, currentDocument) => {
+    //     return accumulator.concat(currentDocument.restaurants);
+    // }, []);
+    // allRestaurants.shift();
+    console.log("allRestaurants:",allRestaurants)
 
     function findObjectByName(arr, name) {
         for (let i = 0; i < arr.length; i++) {
@@ -79,7 +72,7 @@ async function startBot() {
         }
         return null;
     }
-    
+
 
     app.post('/', async (req, res) => {
         //console.log(foodReceipt)
@@ -87,11 +80,11 @@ async function startBot() {
         const data = req.body.payload;
         //console.log(typeof(data.payment.entity.notes.id))
         //console.log("this is server endpoint",data.payment.entity.notes.id,String(foodReceipt._id))
-    
+
         if (event === 'payment_link.paid') {
             console.log("food:", data.payment.entity.notes.food)
             console.log("in post",JSON.parse(data.payment.entity.notes.food))
-            await db.collection("orders").insertOne(JSON.parse(data.payment.entity.notes.food));
+            await db.collection("orders").doc().set(JSON.parse(data.payment.entity.notes.food));
             await client.sendMessage(
                 data.payment.entity.notes.user,
                 "Your order has been confirmed! Thank you for choosing QuickPick."
@@ -99,7 +92,7 @@ async function startBot() {
             let chatId=data.payment.entity.notes.user
             delete userStore[chatId]
         }
-    
+
         res.sendStatus(200);
     })
 
@@ -112,8 +105,8 @@ async function startBot() {
                         "\n"
                     )}\n Use the command /pick followed by a number to pick the restaurant (eg. /pick 1,2,3)`
             );
-        } 
-        
+        }
+
         else if (message.body.startsWith("/pick")) {
             const orderRes = Number(message.body.slice(5).trim() - 1);
             const restaurant = allRestaurants[orderRes].name;
@@ -133,9 +126,9 @@ async function startBot() {
                 message.from,
                 "Your restaurant has been selected, type /confirm to start ordering now."
             );
-        } 
-        
-        
+        }
+
+
         else if (message.body.startsWith("/confirm")) {
             const orderItems = message.body
                 .slice(8)
@@ -146,13 +139,15 @@ async function startBot() {
             const items = orderItems.map((index) => vendor.menu[index]);
             const total = items.reduce((acc, curr) => acc + curr.price, 0);
             const date = new Date();
-            const time = date.toLocaleTimeString();
+            const time = date
             const foodReceipt = {
-                _id: new ObjectId(),
-                restaurant: userStore[chatId],
-                fooditems: items,
-                cost: total,
-                ordertime: time,
+                created_at: time,
+                id: "null",
+                restaurant_id: userStore[chatId],
+                items: items,
+                status: "In-Progress",
+                ready_at: "null",
+                user_id: chatId,
             };
             const paymentOptions = {
                 amount: total*100,
@@ -175,7 +170,13 @@ async function startBot() {
                     .map((item) => `${item.name} - ₹${item.price}`)
                     .join("\n")}\n\nYour total is ₹${total}..`
             );
-            razorpay.paymentLink.create(paymentOptions, (err, linkobj) => {
+
+            await db.collection("orders").doc().set(foodReceipt);
+            await client.sendMessage(
+                chatId,
+                "Your order has been confirmed! Thank you for choosing QuickPick."
+            );
+            razorpay.paymentLink.create(paymentOptions, (_, linkobj) => {
 
                 link = linkobj.short_url;
                 //console.log(linkobj)
@@ -184,17 +185,6 @@ async function startBot() {
             });
             //console.log("receipt that is uploaded to db", foodReceipt);
             //console.log("user state object", userStore);
-
-            //to be removed
-
-                //wait for 3 seconds
-            
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            await db.collection("orders").insertOne(foodReceipt);
-            await client.sendMessage(
-                message.from,
-                "Your order has been confirmed! Thank you for choosing QuickPick."
-            );
         }
 
     });

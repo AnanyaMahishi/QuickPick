@@ -1,0 +1,19 @@
+{
+  menu: [
+    {
+      name: 'Fries',
+      price: 60
+    },
+    {
+      name: 'Burger',
+      price: 120
+    },
+    {
+      name: 'Soda',
+      price: 45
+    }
+  ],
+  name: 'Burger Queen',
+  upiId: 'burgerqueen@upi'
+
+}

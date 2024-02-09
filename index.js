@@ -142,7 +142,6 @@ async function startBot() {
             const time = date
             const foodReceipt = {
                 created_at: time,
-                id: "null",
                 restaurant_id: userStore[chatId],
                 items: items,
                 status: "In-Progress",

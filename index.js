@@ -80,11 +80,14 @@ async function startBot() {
         const data = req.body.payload;
         //console.log(typeof(data.payment.entity.notes.id))
         //console.log("this is server endpoint",data.payment.entity.notes.id,String(foodReceipt._id))
-
+        
         if (event === 'payment_link.paid') {
-            console.log("food:", data.payment.entity.notes.food)
-            console.log("in post",JSON.parse(data.payment.entity.notes.food))
-            await db.collection("orders").doc().set(JSON.parse(data.payment.entity.notes.food));
+            const foodNames = JSON.parse(data.payment.entity.notes.foodNames);
+            const orderId = data.payment.entity.notes.orderId;
+            const orderDoc = await db.collection("orders").doc(orderId).get();
+            const orderData = orderDoc.data();
+            orderData.items = orderData.items.map((item, index) => ({...item, name: foodNames[index]}));
+            await db.collection("orders").doc(orderId).set(orderData);
             await client.sendMessage(
                 data.payment.entity.notes.user,
                 "Your order has been confirmed! Thank you for choosing QuickPick."
@@ -136,38 +139,46 @@ async function startBot() {
                 .map((item) => Number(item.trim()) - 1);
             const chatId = message.from;
             const vendor = findObjectByName(allRestaurants, userStore[chatId]);
-            const items = {};
-            orderItems.forEach((item) => {
-                items[item] = vendor.menu[item];
-                if(items[item]){
-                    items[item]++;
+            let quantities = {};
+
+            for(item of orderItems){
+                if(quantities[item]){
+                    quantities[item] += 1;
+                }else{
+                    quantities[item] = 1;
                 }
-                else{
-                    items[item]=1;
-                }
+            }
+            const items = Object.keys(quantities).map(index => {
+                console.log("Logging index : ",index);
+                console.log("Logging quantities : ",quantities);
+                console.log("Logging vendor.menu index : ",vendor.menu[index]);
+                return {
+                    ...vendor.menu[index],
+                    quantity: quantities[index]
+                };
             });
-            console.log(items);
-            const total = Object.keys(items).reduce((acc, curr) => {
-                const itemPrice = vendor.menu.find(item => item === curr).price;
-                return acc + itemPrice * items[curr];
-            }, 0);
+
+            console.log("Logging items : ",items);
+            const total = items.reduce((acc, curr) => acc + curr.quantity*curr.price, 0);
+            console.log("Logging TOOTAL VALUEEEEEEEEE : ",total);
             const date = new Date();
             const time = date;
             const foodReceipt = {
                 created_at: time,
                 restaurant_id: userStore[chatId],
-                items: items,
+                items: items.map(item => ({price: item.price, quantity: item.quantity})), // only price and quantity
                 status: "In-Progress",
                 ready_at: "null",
                 user_id: chatId,
             };
+            const foodNames = items.map(item => item.name); // separate array for names
             const paymentOptions = {
                 amount: total*100,
                 currency: "INR",
                 description: 'Payment for vendor ',
                 notes: {
                     id:foodReceipt._id,
-                    food:JSON.stringify(foodReceipt),
+                    foodNames: JSON.stringify(foodNames), // pass only names
                     user:message.from,
                 },
                 customer: {
@@ -175,7 +186,7 @@ async function startBot() {
                     email: 'johndoe@example.com',
                 },
             };
-            console.log(paymentOptions.notes.food)
+            console.log(paymentOptions)
             await client.sendMessage(
                 message.from,
                 `Great, you have ordered:\n\n${items
@@ -183,7 +194,8 @@ async function startBot() {
                     .join("\n")}\n\nYour total is ₹${total}..`
             );
 
-            await db.collection("orders").doc().set(foodReceipt);
+            const docRef = await db.collection("orders").doc().set(foodReceipt);
+            paymentOptions.notes.orderId = docRef.id; // add order id to notes
             await client.sendMessage(
                 chatId,
                 "Your order has been confirmed! Thank you for choosing QuickPick."
